@@ -99,17 +99,18 @@ export async function listSiteLists(accessToken: string): Promise<SharePointList
 
 export interface ListItem {
   id: string;
+  webUrl: string;
   fields: Record<string, unknown>;
 }
 
 /** Reads all items (with their column values) from a SharePoint list by its id. */
 export async function listListItems(accessToken: string, listId: string): Promise<ListItem[]> {
   const siteId = await getSiteId(accessToken);
-  const result = await graphFetch<{ value: { id: string; fields: Record<string, unknown> }[] }>(
+  const result = await graphFetch<{ value: { id: string; webUrl: string; fields: Record<string, unknown> }[] }>(
     `/sites/${siteId}/lists/${listId}/items?expand=fields&$top=999`,
     accessToken,
   );
-  return result.value.map((item) => ({ id: item.id, fields: item.fields }));
+  return result.value.map((item) => ({ id: item.id, webUrl: item.webUrl, fields: item.fields }));
 }
 
 const SIMPLE_UPLOAD_MAX_BYTES = 4 * 1024 * 1024; // Graph's simple (non-session) upload limit.

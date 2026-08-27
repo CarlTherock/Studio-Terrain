@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Database, RefreshCw } from 'lucide-react';
+import { Database, ExternalLink, RefreshCw } from 'lucide-react';
 import { listListItems, listSiteLists, type ListItem, type SharePointList } from '@studio-terrain/integrations';
 import { Card } from '@studio-terrain/ui';
 import { useMicrosoftAuth } from '../hooks/useMicrosoftAuth';
@@ -31,17 +31,53 @@ const HIDDEN_FIELDS = new Set([
   'AppEditorLookupId',
 ]);
 
+/** SharePoint hyperlink columns often come back as {Description, Url} instead of a plain string. */
+function extractUrl(value: unknown): string | null {
+  if (typeof value === 'string' && /^https?:\/\//.test(value)) return value;
+  if (value && typeof value === 'object' && 'Url' in value) {
+    const url = (value as { Url?: unknown }).Url;
+    if (typeof url === 'string' && /^https?:\/\//.test(url)) return url;
+  }
+  return null;
+}
+
+function displayValue(value: unknown): string {
+  if (value && typeof value === 'object' && 'Description' in value) {
+    const desc = (value as { Description?: unknown }).Description;
+    if (typeof desc === 'string' && desc) return desc;
+  }
+  return String(value ?? '—');
+}
+
 function FieldsTable({ item }: { item: ListItem }) {
   const rows = Object.entries(item.fields).filter(([key]) => !HIDDEN_FIELDS.has(key));
   return (
     <table className="w-full text-sm">
       <tbody>
-        {rows.map(([key, value]) => (
-          <tr key={key} className="border-b border-anthracite/5 last:border-0">
-            <td className="py-1 pr-3 font-medium text-anthracite/70 align-top whitespace-nowrap">{key}</td>
-            <td className="py-1 text-anthracite break-words">{String(value ?? '—')}</td>
-          </tr>
-        ))}
+        {rows.map(([key, value]) => {
+          const url = extractUrl(value);
+          return (
+            <tr key={key} className="border-b border-anthracite/5 last:border-0">
+              <td className="py-1 pr-3 font-medium text-anthracite/70 align-top whitespace-nowrap">{key}</td>
+              <td className="py-1 text-anthracite break-words">
+                {url ? (
+                  <a
+                    href={url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-1 underline underline-offset-2"
+                    style={{ color: '#0078D4' }}
+                  >
+                    <ExternalLink size={12} aria-hidden="true" />
+                    {displayValue(value)}
+                  </a>
+                ) : (
+                  displayValue(value)
+                )}
+              </td>
+            </tr>
+          );
+        })}
       </tbody>
     </table>
   );
@@ -79,6 +115,18 @@ function ListPreview({ list, accessToken }: { list: SharePointList; accessToken:
       <div className="space-y-4">
         {items?.map((item) => (
           <div key={item.id} className="rounded-control bg-anthracite/5 p-3 overflow-x-auto">
+            <div className="flex justify-end mb-1">
+              <a
+                href={item.webUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-1 text-xs underline underline-offset-2"
+                style={{ color: '#0078D4' }}
+              >
+                <ExternalLink size={12} aria-hidden="true" />
+                Voir l'élément dans SharePoint
+              </a>
+            </div>
             <FieldsTable item={item} />
           </div>
         ))}

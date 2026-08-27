@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import {
   Folder,
   File as FileIcon,
@@ -10,6 +10,7 @@ import {
   RefreshCw,
   ChevronRight,
   Upload,
+  Database,
 } from 'lucide-react';
 import { listChildrenById, listFolder, uploadFile, type DriveItem } from '@studio-terrain/integrations';
 import { Button, Card } from '@studio-terrain/ui';
@@ -115,9 +116,19 @@ export function Documents() {
 
   return (
     <div className="max-w-2xl mx-auto space-y-4">
-      <div className="flex items-center gap-2">
-        <Cloud size={24} style={{ color: ONEDRIVE_BLUE }} aria-hidden="true" />
-        <h1 className="font-serif text-2xl font-semibold">Documents</h1>
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2">
+          <Cloud size={24} style={{ color: ONEDRIVE_BLUE }} aria-hidden="true" />
+          <h1 className="font-serif text-2xl font-semibold">Documents</h1>
+        </div>
+        <Link
+          to="/sharepoint-lists"
+          className="inline-flex items-center gap-1.5 text-sm underline underline-offset-2"
+          style={{ color: ONEDRIVE_BLUE }}
+        >
+          <Database size={14} aria-hidden="true" />
+          Listes SharePoint
+        </Link>
       </div>
       <p className="text-sm text-anthracite/60">
         Parcourez les dossiers OneDrive existants sans les déplacer ni les dupliquer.
