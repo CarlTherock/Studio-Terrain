@@ -19,8 +19,8 @@ export default defineConfig({
         start_url: BASE,
         scope: BASE,
         display: 'standalone',
-        background_color: '#FBF9F4',
-        theme_color: '#2B2E33',
+        background_color: '#FDF8FA',
+        theme_color: '#6B2D45',
         icons: [
           { src: 'icons/icon.svg', sizes: 'any', type: 'image/svg+xml' },
           { src: 'icons/icon.svg', sizes: 'any', type: 'image/svg+xml', purpose: 'maskable' },

@@ -4,11 +4,11 @@
  * "-fill" for icons/backgrounds, "-text" for text-on-ivory (WCAG AA).
  */
 export const colors = {
-  ivory: '#FBF9F4',
-  anthracite: '#2B2E33',
+  ivory: '#FDF8FA',
+  anthracite: '#1A0A12',
   terracotta: {
-    fill: '#C1613D',
-    text: '#8A4429',
+    fill: '#6B2D45',
+    text: '#4A2535',
   },
   sage: {
     fill: '#8FA687',
