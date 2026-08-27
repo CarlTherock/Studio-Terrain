@@ -1,10 +1,13 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Folder, File as FileIcon, ExternalLink, Cloud, CheckCircle2, LogOut } from 'lucide-react';
+import { Folder, File as FileIcon, ExternalLink, Cloud, CheckCircle2, LogOut, RefreshCw } from 'lucide-react';
 import { listChildrenById, listFolder, type DriveItem } from '@studio-terrain/integrations';
 import { Button, Card } from '@studio-terrain/ui';
 import { useLinkProjectOneDriveFolder, useProject, useProjects } from '../hooks/queries';
 import { useMicrosoftAuth } from '../hooks/useMicrosoftAuth';
+
+/** Microsoft's official OneDrive blue — used only for OneDrive-branded elements. */
+const ONEDRIVE_BLUE = '#0078D4';
 
 export function Documents() {
   const [searchParams] = useSearchParams();
@@ -56,9 +59,12 @@ export function Documents() {
 
   return (
     <div className="max-w-2xl mx-auto space-y-4">
-      <h1 className="font-serif text-2xl font-semibold">Documents</h1>
+      <div className="flex items-center gap-2">
+        <Cloud size={24} style={{ color: ONEDRIVE_BLUE }} aria-hidden="true" />
+        <h1 className="font-serif text-2xl font-semibold">Documents</h1>
+      </div>
       <p className="text-sm text-anthracite/60">
-        Parcourez les dossiers OneDrive/SharePoint existants sans les déplacer ni les dupliquer.
+        Parcourez les dossiers OneDrive existants sans les déplacer ni les dupliquer.
       </p>
 
       <Card>
@@ -84,17 +90,23 @@ export function Documents() {
 
       {!auth.account ? (
         <Card>
-          <Button onClick={() => auth.connect()} disabled={auth.connecting}>
+          <button
+            type="button"
+            onClick={() => auth.connect()}
+            disabled={auth.connecting}
+            className="inline-flex items-center gap-2 rounded-control px-4 min-h-[44px] font-medium text-white transition-colors duration-base disabled:opacity-50"
+            style={{ backgroundColor: ONEDRIVE_BLUE }}
+          >
             <Cloud size={18} aria-hidden="true" />
-            {auth.connecting ? 'Connexion…' : 'Se connecter avec Microsoft 365'}
-          </Button>
+            {auth.connecting ? 'Connexion à OneDrive…' : 'Se connecter à OneDrive'}
+          </button>
           {auth.error && <p className="text-sm text-danger-text mt-2">{auth.error}</p>}
         </Card>
       ) : (
         <Card className="flex items-center justify-between">
           <span className="inline-flex items-center gap-2 text-sm">
-            <CheckCircle2 size={18} className="text-sage-text" aria-hidden="true" />
-            Connecté avec Microsoft 365{auth.account.username ? ` (${auth.account.username})` : ''}
+            <CheckCircle2 size={18} style={{ color: ONEDRIVE_BLUE }} aria-hidden="true" />
+            Connecté à OneDrive{auth.account.username ? ` (${auth.account.username})` : ''}
           </span>
           <button
             type="button"
@@ -122,7 +134,8 @@ export function Documents() {
                 href={project.data.oneDriveWebUrl}
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex items-center gap-1 text-sm text-terracotta-text underline underline-offset-2"
+                className="inline-flex items-center gap-1 text-sm underline underline-offset-2"
+                style={{ color: ONEDRIVE_BLUE }}
               >
                 <ExternalLink size={14} aria-hidden="true" />
                 Ouvrir dans OneDrive
@@ -130,15 +143,29 @@ export function Documents() {
             )}
           </div>
 
-          {loadingFolder && <p className="text-sm text-anthracite/60">Chargement…</p>}
-          {folderError && <p className="text-sm text-danger-text">{folderError}</p>}
+          <div className="mb-3" role="status">
+            {loadingFolder ? (
+              <span className="inline-flex items-center gap-1.5 text-sm text-anthracite/60">
+                <RefreshCw size={14} className="animate-spin" aria-hidden="true" />
+                Synchronisation avec OneDrive…
+              </span>
+            ) : (
+              items && (
+                <span className="inline-flex items-center gap-1.5 text-sm" style={{ color: ONEDRIVE_BLUE }}>
+                  <CheckCircle2 size={14} aria-hidden="true" />
+                  Synchronisé avec OneDrive
+                </span>
+              )
+            )}
+            {folderError && <p className="text-sm text-danger-text">{folderError}</p>}
+          </div>
 
           <ul className="divide-y divide-anthracite/10">
             {items?.map((item) => (
               <li key={item.id} className="py-2 flex items-center justify-between gap-3 text-sm">
                 <span className="inline-flex items-center gap-2 truncate">
                   {item.isFolder ? (
-                    <Folder size={16} className="text-terracotta-text shrink-0" aria-hidden="true" />
+                    <Folder size={16} style={{ color: ONEDRIVE_BLUE }} className="shrink-0" aria-hidden="true" />
                   ) : (
                     <FileIcon size={16} className="text-anthracite/50 shrink-0" aria-hidden="true" />
                   )}
