@@ -1,0 +1,47 @@
+{
+  "name": "web",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "lint": "eslint src --max-warnings 0",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:e2e": "playwright test"
+  },
+  "dependencies": {
+    "@studio-terrain/domain": "workspace:*",
+    "@studio-terrain/sync": "workspace:*",
+    "@studio-terrain/ui": "workspace:*",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^6.28.0",
+    "@tanstack/react-query": "^5.59.20",
+    "dexie": "^4.0.9",
+    "dexie-react-hooks": "^1.1.7",
+    "lucide-react": "^0.454.0",
+    "framer-motion": "^11.11.17",
+    "workbox-window": "^7.1.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@vitejs/plugin-react": "^4.3.3",
+    "vite": "^5.4.11",
+    "vite-plugin-pwa": "^0.20.5",
+    "typescript": "^5.6.3",
+    "tailwindcss": "^3.4.14",
+    "postcss": "^8.4.47",
+    "autoprefixer": "^10.4.20",
+    "vitest": "^2.1.4",
+    "jsdom": "^25.0.1",
+    "@testing-library/react": "^16.0.1",
+    "@testing-library/jest-dom": "^6.6.3",
+    "@playwright/test": "^1.48.2",
+    "fake-indexeddb": "^6.0.0",
+    "@types/node": "^22.9.0"
+  }
+}

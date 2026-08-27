@@ -67,7 +67,7 @@ L'indicateur d'état affiche toujours icône + texte : "Synchronisé", "N élém
 
 - `apps/api` : backend réel (Fastify/NestJS, PostgreSQL, Prisma/Drizzle).
 - Authentification réelle, permissions par rôle appliquées, isolement multi-organisation.
-- Microsoft Graph (Entra ID, OneDrive/SharePoint).
+- Microsoft Graph (Entra ID, OneDrive/SharePoint) — **priorité utilisateur confirmée** : la structure de dossiers existe déjà dans OneDrive et devra être associée aux projets. Techniquement bloqué tant qu'`apps/api` n'existe pas : Microsoft Graph exige un flux authorization code + PKCE avec un secret côté serveur (spec §9), qu'un site GitHub Pages 100% statique ne peut pas héberger en sécurité. À reprendre dès que le backend réel est en place.
 - `packages/ai` : transcription de réunion, génération de comptes rendus.
 - `packages/integrations`, `packages/reporting`.
 - Chiffrement des données au repos (actuellement en clair dans IndexedDB — voir [THREAT-MODEL.md](./THREAT-MODEL.md)).
