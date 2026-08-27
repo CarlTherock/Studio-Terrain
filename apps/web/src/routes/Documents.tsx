@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Folder, File as FileIcon, ExternalLink, Cloud } from 'lucide-react';
+import { Folder, File as FileIcon, ExternalLink, Cloud, CheckCircle2, LogOut } from 'lucide-react';
 import { listChildrenById, listFolder, type DriveItem } from '@studio-terrain/integrations';
 import { Button, Card } from '@studio-terrain/ui';
 import { useLinkProjectOneDriveFolder, useProject, useProjects } from '../hooks/queries';
@@ -82,7 +82,7 @@ export function Documents() {
         </select>
       </Card>
 
-      {!auth.account && (
+      {!auth.account ? (
         <Card>
           <Button onClick={() => auth.connect()} disabled={auth.connecting}>
             <Cloud size={18} aria-hidden="true" />
@@ -90,6 +90,25 @@ export function Documents() {
           </Button>
           {auth.error && <p className="text-sm text-danger-text mt-2">{auth.error}</p>}
         </Card>
+      ) : (
+        <Card className="flex items-center justify-between">
+          <span className="inline-flex items-center gap-2 text-sm">
+            <CheckCircle2 size={18} className="text-sage-text" aria-hidden="true" />
+            Connecté avec Microsoft 365{auth.account.username ? ` (${auth.account.username})` : ''}
+          </span>
+          <button
+            type="button"
+            onClick={() => auth.disconnect()}
+            className="inline-flex items-center gap-1.5 text-sm text-anthracite/60 hover:text-anthracite"
+          >
+            <LogOut size={16} aria-hidden="true" />
+            Déconnecter
+          </button>
+        </Card>
+      )}
+
+      {auth.account && !projectId && (
+        <p className="text-sm text-anthracite/60">Choisissez un projet ci-dessus pour parcourir ses documents.</p>
       )}
 
       {auth.account && projectId && (
