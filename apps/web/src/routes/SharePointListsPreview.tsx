@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
-import { Database, ExternalLink, RefreshCw } from 'lucide-react';
+import { Cloud, Database, ExternalLink, RefreshCw } from 'lucide-react';
 import { listListItems, listSiteLists, type ListItem, type SharePointList } from '@studio-terrain/integrations';
-import { Card } from '@studio-terrain/ui';
+import { Button, Card } from '@studio-terrain/ui';
 import { useMicrosoftAuth } from '../hooks/useMicrosoftAuth';
 import { MicrosoftSignInButton } from '../components/MicrosoftSignInButton';
+import { OneDriveBrowser } from '../components/OneDriveBrowser';
 
 const WANTED_LISTS = ['Clients', 'Projets'];
 
@@ -83,6 +84,41 @@ function FieldsTable({ item }: { item: ListItem }) {
   );
 }
 
+function ListItemCard({ item, accessToken }: { item: ListItem; accessToken: string }) {
+  const [showFiles, setShowFiles] = useState(false);
+  return (
+    <div className="rounded-control bg-anthracite/5 p-3 overflow-x-auto">
+      <div className="flex justify-between items-center mb-2 gap-2">
+        <Button
+          variant={showFiles ? 'secondary' : 'primary'}
+          onClick={() => setShowFiles((v) => !v)}
+          className="text-xs px-3 min-h-[32px]"
+        >
+          <Cloud size={13} aria-hidden="true" />
+          {showFiles ? 'Masquer les fichiers OneDrive' : 'Voir les fichiers OneDrive'}
+        </Button>
+        <a
+          href={item.webUrl}
+          target="_blank"
+          rel="noreferrer"
+          className="inline-flex items-center gap-1 text-xs text-anthracite/50 underline underline-offset-2 shrink-0"
+        >
+          <ExternalLink size={11} aria-hidden="true" />
+          Fiche SharePoint
+        </a>
+      </div>
+
+      {showFiles && (
+        <div className="mb-3 rounded-control bg-white p-3">
+          <OneDriveBrowser accessToken={accessToken} />
+        </div>
+      )}
+
+      <FieldsTable item={item} />
+    </div>
+  );
+}
+
 function ListPreview({ list, accessToken }: { list: SharePointList; accessToken: string }) {
   const [items, setItems] = useState<ListItem[] | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -114,21 +150,7 @@ function ListPreview({ list, accessToken }: { list: SharePointList; accessToken:
       {items && items.length === 0 && <p className="text-sm text-anthracite/60">Liste vide.</p>}
       <div className="space-y-4">
         {items?.map((item) => (
-          <div key={item.id} className="rounded-control bg-anthracite/5 p-3 overflow-x-auto">
-            <div className="flex justify-end mb-1">
-              <a
-                href={item.webUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex items-center gap-1 text-xs underline underline-offset-2"
-                style={{ color: '#0078D4' }}
-              >
-                <ExternalLink size={12} aria-hidden="true" />
-                Voir l'élément dans SharePoint
-              </a>
-            </div>
-            <FieldsTable item={item} />
-          </div>
+          <ListItemCard key={item.id} item={item} accessToken={accessToken} />
         ))}
       </div>
     </Card>
