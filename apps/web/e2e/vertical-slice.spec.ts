@@ -10,11 +10,16 @@ test.describe('StudioTerrain vertical slice', () => {
     await page.goto('/');
     await expect(page.getByRole('heading', { name: 'Cockpit' })).toBeVisible();
 
-    // 1. Create a client.
-    await page.goto('/#/clients/new');
-    await page.getByLabel('Nom du client').fill('Résidence Tremblay');
-    await page.getByRole('button', { name: 'Enregistrer' }).click();
-    await expect(page.getByText('Résidence Tremblay')).toBeVisible();
+    // 1. Seed a client. Clients now come exclusively from the Tally intake
+    // forms (no manual-entry UI) — use the test-only seam instead.
+    await page.waitForFunction(() => Boolean(window.__studioTerrainApi));
+    await page.evaluate(() =>
+      window.__studioTerrainApi!.clients.create({
+        orgId: 'org-demo',
+        name: 'Résidence Tremblay',
+        contactIds: [],
+      }),
+    );
 
     // 2. Create a project + zone.
     await page.goto('/#/projects/new');

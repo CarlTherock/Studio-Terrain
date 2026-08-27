@@ -17,6 +17,10 @@ export function ApiClientProvider({ children }: { children: ReactNode }) {
   const value = useMemo<ApiClientContextValue>(() => {
     const db = createDb();
     const api = createLocalApiAdapter(db);
+    // Test-only seam: lets Playwright seed local data (e.g. a client) that
+    // no longer has a manual-entry UI path (clients now come exclusively
+    // from the Tally intake forms). Not used by any app UI code.
+    window.__studioTerrainApi = api;
     return { api, db };
   }, []);
 
