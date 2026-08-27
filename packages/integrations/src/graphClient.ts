@@ -78,6 +78,40 @@ export async function listChildrenById(accessToken: string, itemId: string): Pro
   return result.value.map(toDriveItem);
 }
 
+export interface SharePointList {
+  id: string;
+  displayName: string;
+}
+
+/** Enumerates the SharePoint lists (not document libraries) on the configured site. */
+export async function listSiteLists(accessToken: string): Promise<SharePointList[]> {
+  const siteId = await getSiteId(accessToken);
+  const result = await graphFetch<{ value: { id: string; displayName: string; list?: { template?: string } }[] }>(
+    `/sites/${siteId}/lists?$select=id,displayName,list`,
+    accessToken,
+  );
+  // "documentLibrary" template = a file library (e.g. the CLIENTS drive) —
+  // excluded here since we only want genuine SharePoint lists.
+  return result.value
+    .filter((l) => l.list?.template !== 'documentLibrary')
+    .map((l) => ({ id: l.id, displayName: l.displayName }));
+}
+
+export interface ListItem {
+  id: string;
+  fields: Record<string, unknown>;
+}
+
+/** Reads all items (with their column values) from a SharePoint list by its id. */
+export async function listListItems(accessToken: string, listId: string): Promise<ListItem[]> {
+  const siteId = await getSiteId(accessToken);
+  const result = await graphFetch<{ value: { id: string; fields: Record<string, unknown> }[] }>(
+    `/sites/${siteId}/lists/${listId}/items?expand=fields&$top=999`,
+    accessToken,
+  );
+  return result.value.map((item) => ({ id: item.id, fields: item.fields }));
+}
+
 const SIMPLE_UPLOAD_MAX_BYTES = 4 * 1024 * 1024; // Graph's simple (non-session) upload limit.
 
 /**

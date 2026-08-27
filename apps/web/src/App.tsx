@@ -17,6 +17,9 @@ import { TimeTracking } from './routes/TimeTracking';
 
 // Lazy-loaded: pulls in @azure/msal-browser, kept out of the initial bundle.
 const Documents = lazy(() => import('./routes/Documents').then((m) => ({ default: m.Documents })));
+const SharePointListsPreview = lazy(() =>
+  import('./routes/SharePointListsPreview').then((m) => ({ default: m.SharePointListsPreview })),
+);
 
 export function App() {
   return (
@@ -37,6 +40,7 @@ export function App() {
         <Route path="/sync" element={<SyncStatusDetail />} />
         <Route path="/time" element={<TimeTracking />} />
         <Route path="/documents" element={<Documents />} />
+        <Route path="/sharepoint-lists" element={<SharePointListsPreview />} />
       </Routes>
       </Suspense>
     </AppShell>

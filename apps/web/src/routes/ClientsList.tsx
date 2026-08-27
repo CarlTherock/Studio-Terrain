@@ -13,6 +13,12 @@ export function ClientsList() {
           Nouveau client
         </Link>
       </div>
+      <Link
+        to="/sharepoint-lists"
+        className="inline-block text-xs text-anthracite/50 underline underline-offset-2"
+      >
+        Aperçu des listes SharePoint (Clients/Projets)
+      </Link>
       <Card>
         {clients.isLoading && <p className="text-sm text-anthracite/60">Chargement…</p>}
         {clients.data && clients.data.length === 0 && (
