@@ -7,9 +7,49 @@
     <meta name="description" content="StudioTerrain — carnet de chantier professionnel pour designers et équipes de construction." />
     <link rel="icon" type="image/svg+xml" href="icons/icon.svg" />
     <link rel="apple-touch-icon" href="icons/icon.svg" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="StudioTerrain" />
     <title>StudioTerrain</title>
+    <style>
+      #app-splash {
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        background: #fdf8fa;
+        transition: opacity 300ms ease;
+      }
+      #app-splash.app-splash-hidden {
+        opacity: 0;
+        pointer-events: none;
+      }
+      #app-splash svg {
+        width: 72px;
+        height: 72px;
+      }
+      #app-splash span {
+        font-family: Georgia, 'Times New Roman', serif;
+        font-weight: 700;
+        font-size: 20px;
+        color: #1a0a12;
+        letter-spacing: 0.02em;
+      }
+    </style>
   </head>
   <body class="bg-ivory text-anthracite antialiased">
+    <div id="app-splash" aria-hidden="true">
+      <svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+        <rect width="512" height="512" rx="96" fill="#1A0A12" />
+        <text x="256" y="300" font-family="Georgia, 'Times New Roman', serif" font-size="220" font-weight="700" fill="#FDF8FA" text-anchor="middle">ST</text>
+        <rect x="96" y="352" width="320" height="16" rx="8" fill="#6B2D45" />
+      </svg>
+      <span>StudioTerrain</span>
+    </div>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

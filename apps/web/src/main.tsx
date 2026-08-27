@@ -22,3 +22,19 @@ createRoot(rootEl).render(
     </ApiClientProvider>
   </StrictMode>,
 );
+
+// Hide the static splash (index.html) once the app has painted, with a
+// short minimum so it doesn't just flash on fast connections.
+const splash = document.getElementById('app-splash');
+if (splash) {
+  const MIN_VISIBLE_MS = 500;
+  const start = performance.now();
+  requestAnimationFrame(() => {
+    const elapsed = performance.now() - start;
+    const remaining = Math.max(0, MIN_VISIBLE_MS - elapsed);
+    setTimeout(() => {
+      splash.classList.add('app-splash-hidden');
+      setTimeout(() => splash.remove(), 350);
+    }, remaining);
+  });
+}

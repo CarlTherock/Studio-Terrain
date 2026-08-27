@@ -18,7 +18,7 @@ export function BottomNav({ items }: BottomNavProps) {
   return (
     <nav
       aria-label="Navigation principale"
-      className="fixed bottom-0 inset-x-0 bg-ivory/95 backdrop-blur border-t border-anthracite/10 flex justify-around py-1 pb-[env(safe-area-inset-bottom)]"
+      className="fixed bottom-0 inset-x-0 bg-ivory/95 backdrop-blur border-t border-anthracite/10 flex justify-around py-1 pb-[env(safe-area-inset-bottom)] pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)]"
     >
       {items.map((item) => {
         const Icon = item.icon;
