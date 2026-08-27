@@ -8,6 +8,7 @@ import type {
   Project,
   SyncOperation,
   Task,
+  TimeEntry,
   Zone,
 } from '@studio-terrain/domain';
 
@@ -20,6 +21,7 @@ export class StudioTerrainDB extends Dexie {
   observations!: Table<Observation, string>;
   photos!: Table<Photo, string>;
   tasks!: Table<Task, string>;
+  timeEntries!: Table<TimeEntry, string>;
   syncQueue!: Table<SyncOperation, string>;
 
   constructor(name = 'studio-terrain') {
@@ -34,6 +36,9 @@ export class StudioTerrainDB extends Dexie {
       photos: 'id, observationId, deletedAt',
       tasks: 'id, projectId, assigneeId, status, deletedAt',
       syncQueue: 'id, status, localSeq, entityType, entityId',
+    });
+    this.version(2).stores({
+      timeEntries: 'id, projectId, deletedAt',
     });
   }
 }

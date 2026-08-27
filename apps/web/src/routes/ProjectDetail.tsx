@@ -1,8 +1,19 @@
 import { useEffect } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
+import { FileDown } from 'lucide-react';
+import { computeDurationMinutes } from '@studio-terrain/domain';
 import { Card } from '@studio-terrain/ui';
-import { useEnsureDemoPlan, useObservations, usePlans, useProject, useTasks, useZones } from '../hooks/queries';
+import {
+  useEnsureDemoPlan,
+  useObservations,
+  usePlans,
+  useProject,
+  useTasks,
+  useTimeEntries,
+  useZones,
+} from '../hooks/queries';
 import { PROJECT_STATUS_LABELS, TASK_STATUS_LABELS } from '../constants/labels';
+import { downloadCsv, toCsv } from '../lib/csv';
 
 export function ProjectDetail() {
   const { projectId } = useParams<{ projectId: string }>();
@@ -12,7 +23,26 @@ export function ProjectDetail() {
   const plans = usePlans(projectId);
   const observations = useObservations(projectId);
   const tasks = useTasks(projectId);
+  const timeEntries = useTimeEntries(projectId);
   const ensurePlan = useEnsureDemoPlan(projectId);
+
+  function handleExportCsv() {
+    if (!project.data) return;
+    const csv = toCsv(
+      ['Type', 'Détail', 'Statut', 'Date'],
+      [
+        ...(observations.data ?? []).map((o) => ['Observation', o.note || '(sans note)', '', o.createdAt]),
+        ...(tasks.data ?? []).map((t) => ['Tâche', t.title, TASK_STATUS_LABELS[t.status] ?? t.status, t.createdAt]),
+        ...(timeEntries.data ?? []).map((e) => [
+          'Temps',
+          `${e.category}${e.billable ? '' : ' (non facturable)'}`,
+          e.endedAt ? `${computeDurationMinutes(e)} min` : 'en cours',
+          e.startedAt,
+        ]),
+      ],
+    );
+    downloadCsv(`${project.data.name}.csv`, csv);
+  }
 
   const ensurePlanMutate = ensurePlan.mutate;
   useEffect(() => {
@@ -29,11 +59,21 @@ export function ProjectDetail() {
 
   return (
     <div className="max-w-3xl mx-auto space-y-6">
-      <div>
-        <h1 className="font-serif text-2xl font-semibold">{project.data.name}</h1>
-        <p className="text-sm text-anthracite/60 uppercase tracking-wide">
-          {PROJECT_STATUS_LABELS[project.data.status] ?? project.data.status}
-        </p>
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <h1 className="font-serif text-2xl font-semibold">{project.data.name}</h1>
+          <p className="text-sm text-anthracite/60 uppercase tracking-wide">
+            {PROJECT_STATUS_LABELS[project.data.status] ?? project.data.status}
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={handleExportCsv}
+          className="inline-flex items-center gap-1.5 text-sm text-terracotta-text underline underline-offset-2"
+        >
+          <FileDown size={16} aria-hidden="true" />
+          Exporter (CSV)
+        </button>
       </div>
 
       <Card>

@@ -6,6 +6,8 @@ import type {
   Plan,
   Project,
   Task,
+  TimeEntry,
+  TimeEntryCategory,
   Zone,
 } from '@studio-terrain/domain';
 import { useApiClient } from '../context/ApiClientProvider';
@@ -188,5 +190,44 @@ export function useCreateTask() {
         status: 'a_traiter',
       } as Omit<Task, 'id' | 'createdAt' | 'updatedAt' | 'deletedAt' | 'version'>),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['tasks'] }),
+  });
+}
+
+export function useTimeEntries(projectId?: string) {
+  const { api } = useApiClient();
+  return useQuery({
+    queryKey: ['timeEntries', projectId ?? 'all'],
+    queryFn: () => api.timeEntries.list(projectId ? ({ projectId } as Partial<TimeEntry>) : undefined),
+  });
+}
+
+export function useRunningTimeEntry(projectId: string | undefined) {
+  const entries = useTimeEntries(projectId);
+  const running = entries.data?.find((entry) => !entry.endedAt);
+  return { running, isLoading: entries.isLoading };
+}
+
+export function useStartTimeEntry() {
+  const { api } = useApiClient();
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (input: { projectId: string; category: TimeEntryCategory; billable: boolean }) =>
+      api.timeEntries.create({
+        projectId: input.projectId,
+        category: input.category,
+        billable: input.billable,
+        startedAt: new Date().toISOString(),
+      } as Omit<TimeEntry, 'id' | 'createdAt' | 'updatedAt' | 'deletedAt' | 'version'>),
+    onSuccess: (entry) => qc.invalidateQueries({ queryKey: ['timeEntries', entry.projectId] }),
+  });
+}
+
+export function useStopTimeEntry() {
+  const { api } = useApiClient();
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (input: { id: string; projectId: string }) =>
+      api.timeEntries.update(input.id, { endedAt: new Date().toISOString() }),
+    onSuccess: (_entry, input) => qc.invalidateQueries({ queryKey: ['timeEntries', input.projectId] }),
   });
 }

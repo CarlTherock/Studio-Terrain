@@ -1,5 +1,5 @@
 import type { BaseEntity } from '@studio-terrain/domain';
-import type { Client, Contact, Observation, Photo, Plan, Project, Task, Zone } from '@studio-terrain/domain';
+import type { Client, Contact, Observation, Photo, Plan, Project, Task, TimeEntry, Zone } from '@studio-terrain/domain';
 
 export interface EntityApi<T extends BaseEntity> {
   list(filter?: Partial<T>): Promise<T[]>;
@@ -24,4 +24,5 @@ export interface ApiClient {
   observations: EntityApi<Observation>;
   photos: EntityApi<Photo>;
   tasks: EntityApi<Task>;
+  timeEntries: EntityApi<TimeEntry>;
 }

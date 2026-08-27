@@ -100,6 +100,23 @@ export interface Task extends BaseEntity {
   dueDate?: string;
 }
 
+export type TimeEntryCategory =
+  | 'bureau'
+  | 'trajet'
+  | 'chantier'
+  | 'reunion'
+  | 'conception'
+  | 'administration';
+
+export interface TimeEntry extends BaseEntity {
+  projectId: string;
+  category: TimeEntryCategory;
+  billable: boolean;
+  startedAt: string;
+  endedAt?: string;
+  note?: string;
+}
+
 export type SyncOpType = 'create' | 'update' | 'delete';
 export type SyncOpStatus = 'pending' | 'synced' | 'conflict' | 'error';
 

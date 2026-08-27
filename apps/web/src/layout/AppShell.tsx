@@ -30,7 +30,7 @@ const SIDEBAR_ENTRIES: NavEntry[] = [
   { key: 'taches', label: 'Tâches', icon: ListChecks, to: '/tasks' },
   { key: 'reunions', label: 'Réunions', icon: Video, disabledHint: 'Bientôt disponible' },
   { key: 'documents', label: 'Documents', icon: Files, disabledHint: 'Bientôt disponible' },
-  { key: 'temps', label: 'Temps', icon: Timer, disabledHint: 'Bientôt disponible' },
+  { key: 'temps', label: 'Temps', icon: Timer, to: '/time' },
   { key: 'rapports', label: 'Rapports', icon: FileBarChart, disabledHint: 'Bientôt disponible' },
 ];
 

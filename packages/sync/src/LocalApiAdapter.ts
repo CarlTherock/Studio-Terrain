@@ -95,5 +95,6 @@ export function createLocalApiAdapter(db: StudioTerrainDB): ApiClient {
     observations: createEntityApi(db, db.observations, 'observation'),
     photos: createEntityApi(db, db.photos, 'photo'),
     tasks: createEntityApi(db, db.tasks, 'task'),
+    timeEntries: createEntityApi(db, db.timeEntries, 'timeEntry'),
   };
 }

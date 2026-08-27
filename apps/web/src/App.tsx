@@ -12,6 +12,7 @@ import { TasksList } from './routes/TasksList';
 import { TaskNew } from './routes/TaskNew';
 import { Search } from './routes/Search';
 import { SyncStatusDetail } from './routes/SyncStatusDetail';
+import { TimeTracking } from './routes/TimeTracking';
 
 export function App() {
   return (
@@ -29,6 +30,7 @@ export function App() {
         <Route path="/tasks/new" element={<TaskNew />} />
         <Route path="/search" element={<Search />} />
         <Route path="/sync" element={<SyncStatusDetail />} />
+        <Route path="/time" element={<TimeTracking />} />
       </Routes>
     </AppShell>
   );
