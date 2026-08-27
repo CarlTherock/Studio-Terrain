@@ -22,7 +22,7 @@
 | `Plan` | projectId, zoneId?, name | Project, Zone |
 | `PlanVersion` | planId, versionLabel, fileRef | Plan |
 | `Observation` | projectId, zoneId?, planVersionId?, note, photoIds[], authorId, markerX?, markerY? | Project, Zone, PlanVersion, Photo[] |
-| `Photo` | observationId, blobRef, annotations? | Observation |
+| `Photo` | observationId, blob, annotations? | Observation |
 | `Task` | projectId, observationId?, title, assigneeId?, status, dueDate? | Project, Observation, User |
 | `SyncOperation` | entityType, entityId, opType, payload, status, localSeq | — (méta-entité de synchronisation) |
 
