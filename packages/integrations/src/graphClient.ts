@@ -77,3 +77,36 @@ export async function listChildrenById(accessToken: string, itemId: string): Pro
   );
   return result.value.map(toDriveItem);
 }
+
+const SIMPLE_UPLOAD_MAX_BYTES = 4 * 1024 * 1024; // Graph's simple (non-session) upload limit.
+
+/**
+ * Uploads a file into an existing folder by its stable driveItem id — used
+ * to send StudioTerrain content (photos, exports) into the client's real
+ * OneDrive/SharePoint subfolders (e.g. "10_Photos"). Files over 4MB need a
+ * resumable upload session, not implemented yet.
+ */
+export async function uploadFile(
+  accessToken: string,
+  folderId: string,
+  filename: string,
+  content: Blob,
+): Promise<DriveItem> {
+  if (content.size > SIMPLE_UPLOAD_MAX_BYTES) {
+    throw new Error('Fichier trop volumineux pour cet envoi (max 4 Mo pour l\'instant).');
+  }
+  const siteId = await getSiteId(accessToken);
+  const res = await fetch(
+    `https://graph.microsoft.com/v1.0/sites/${siteId}/drive/items/${folderId}:/${encodeURIComponent(filename)}:/content`,
+    {
+      method: 'PUT',
+      headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': content.type || 'application/octet-stream' },
+      body: content,
+    },
+  );
+  if (!res.ok) {
+    const body = await res.text();
+    throw new Error(`Microsoft Graph ${res.status}: ${body}`);
+  }
+  return toDriveItem((await res.json()) as GraphDriveItemResponse);
+}

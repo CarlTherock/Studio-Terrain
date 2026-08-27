@@ -1,7 +1,17 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Folder, File as FileIcon, ExternalLink, Cloud, CheckCircle2, LogOut, RefreshCw } from 'lucide-react';
-import { listChildrenById, listFolder, type DriveItem } from '@studio-terrain/integrations';
+import {
+  Folder,
+  File as FileIcon,
+  ExternalLink,
+  Cloud,
+  CheckCircle2,
+  LogOut,
+  RefreshCw,
+  ChevronRight,
+  Upload,
+} from 'lucide-react';
+import { listChildrenById, listFolder, uploadFile, type DriveItem } from '@studio-terrain/integrations';
 import { Button, Card } from '@studio-terrain/ui';
 import { useLinkProjectOneDriveFolder, useProject, useProjects } from '../hooks/queries';
 import { useMicrosoftAuth } from '../hooks/useMicrosoftAuth';
@@ -10,6 +20,12 @@ import { MicrosoftSignInButton } from '../components/MicrosoftSignInButton';
 /** Microsoft's official OneDrive blue — used only for OneDrive-branded elements. */
 const ONEDRIVE_BLUE = '#0078D4';
 
+interface Crumb {
+  name: string;
+  /** null only for the root ("CLIENTS") crumb, which has no driveItem id yet. */
+  id: string | null;
+}
+
 export function Documents() {
   const [searchParams] = useSearchParams();
   const projects = useProjects();
@@ -17,24 +33,39 @@ export function Documents() {
   const project = useProject(projectId || undefined);
   const linkFolder = useLinkProjectOneDriveFolder();
   const auth = useMicrosoftAuth();
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const [crumbs, setCrumbs] = useState<Crumb[]>([{ name: 'Dossiers clients', id: null }]);
   const [items, setItems] = useState<DriveItem[] | null>(null);
   const [loadingFolder, setLoadingFolder] = useState(false);
   const [folderError, setFolderError] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
+
+  // When a project already has a linked folder, start browsing there instead of the root.
+  useEffect(() => {
+    if (project.data?.oneDriveFolderId && project.data.oneDriveFolderName) {
+      setCrumbs([
+        { name: 'Dossiers clients', id: null },
+        { name: project.data.oneDriveFolderName, id: project.data.oneDriveFolderId },
+      ]);
+    } else {
+      setCrumbs([{ name: 'Dossiers clients', id: null }]);
+    }
+  }, [project.data?.oneDriveFolderId, project.data?.oneDriveFolderName]);
+
+  const current = crumbs[crumbs.length - 1] ?? crumbs[0]!;
 
   useEffect(() => {
     setItems(null);
     setFolderError(null);
-    if (!auth.account || !projectId || !project.data) return;
+    if (!auth.account || !projectId) return;
 
     let cancelled = false;
     setLoadingFolder(true);
     (async () => {
       try {
         const token = await auth.getToken();
-        const children = project.data?.oneDriveFolderId
-          ? await listChildrenById(token, project.data.oneDriveFolderId)
-          : await listFolder(token, '');
+        const children = current.id ? await listChildrenById(token, current.id) : await listFolder(token, '');
         if (!cancelled) setItems(children);
       } catch (err) {
         if (!cancelled) setFolderError(err instanceof Error ? err.message : 'Erreur OneDrive');
@@ -46,7 +77,15 @@ export function Documents() {
     return () => {
       cancelled = true;
     };
-  }, [auth.account, projectId, project.data?.oneDriveFolderId]);
+  }, [auth.account, projectId, current.id]);
+
+  function openFolder(item: DriveItem) {
+    setCrumbs((prev) => [...prev, { name: item.name, id: item.id }]);
+  }
+
+  function goToCrumb(index: number) {
+    setCrumbs((prev) => prev.slice(0, index + 1));
+  }
 
   async function handleAssociate(item: DriveItem) {
     if (!projectId) return;
@@ -56,6 +95,22 @@ export function Documents() {
       folderName: item.name,
       webUrl: item.webUrl,
     });
+  }
+
+  async function handleUpload(file: File) {
+    if (!current.id) return; // can't upload directly into the root client list
+    setUploading(true);
+    setFolderError(null);
+    try {
+      const token = await auth.getToken();
+      await uploadFile(token, current.id, file.name, file);
+      const children = await listChildrenById(token, current.id);
+      setItems(children);
+    } catch (err) {
+      setFolderError(err instanceof Error ? err.message : 'Échec de l\'envoi vers OneDrive');
+    } finally {
+      setUploading(false);
+    }
   }
 
   return (
@@ -124,52 +179,101 @@ export function Documents() {
 
       {auth.account && projectId && (
         <Card>
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="font-semibold">
-              {project.data?.oneDriveFolderName ?? 'Dossiers clients (racine)'}
-            </h2>
-            {project.data?.oneDriveWebUrl && (
-              <a
-                href={project.data.oneDriveWebUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex items-center gap-1 text-sm underline underline-offset-2"
-                style={{ color: ONEDRIVE_BLUE }}
-              >
-                <ExternalLink size={14} aria-hidden="true" />
-                Ouvrir dans OneDrive
-              </a>
-            )}
+          <nav aria-label="Fil d'ariane" className="flex flex-wrap items-center gap-1 mb-3 text-sm">
+            {crumbs.map((crumb, index) => (
+              <span key={`${crumb.id ?? 'root'}-${index}`} className="flex items-center gap-1">
+                {index > 0 && <ChevronRight size={14} className="text-anthracite/30" aria-hidden="true" />}
+                <button
+                  type="button"
+                  onClick={() => goToCrumb(index)}
+                  disabled={index === crumbs.length - 1}
+                  className={
+                    index === crumbs.length - 1
+                      ? 'font-semibold text-anthracite'
+                      : 'text-terracotta-text underline underline-offset-2'
+                  }
+                >
+                  {crumb.name}
+                </button>
+              </span>
+            ))}
+          </nav>
+
+          <div className="flex items-center justify-between mb-3 gap-2">
+            <div className="min-w-0" role="status">
+              {loadingFolder ? (
+                <span className="inline-flex items-center gap-1.5 text-sm text-anthracite/60">
+                  <RefreshCw size={14} className="animate-spin" aria-hidden="true" />
+                  Synchronisation avec OneDrive…
+                </span>
+              ) : (
+                items && (
+                  <span className="inline-flex items-center gap-1.5 text-sm" style={{ color: ONEDRIVE_BLUE }}>
+                    <CheckCircle2 size={14} aria-hidden="true" />
+                    Synchronisé avec OneDrive
+                  </span>
+                )
+              )}
+            </div>
+            <div className="flex items-center gap-3 shrink-0">
+              {current.id && (
+                <>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) void handleUpload(file);
+                      e.target.value = '';
+                    }}
+                  />
+                  <Button
+                    variant="secondary"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={uploading}
+                    className="text-xs px-3 min-h-[36px]"
+                  >
+                    <Upload size={14} aria-hidden="true" />
+                    {uploading ? 'Envoi…' : 'Envoyer ici'}
+                  </Button>
+                </>
+              )}
+              {project.data?.oneDriveWebUrl && (
+                <a
+                  href={project.data.oneDriveWebUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-1 text-sm underline underline-offset-2"
+                  style={{ color: ONEDRIVE_BLUE }}
+                >
+                  <ExternalLink size={14} aria-hidden="true" />
+                  Ouvrir dans OneDrive
+                </a>
+              )}
+            </div>
           </div>
 
-          <div className="mb-3" role="status">
-            {loadingFolder ? (
-              <span className="inline-flex items-center gap-1.5 text-sm text-anthracite/60">
-                <RefreshCw size={14} className="animate-spin" aria-hidden="true" />
-                Synchronisation avec OneDrive…
-              </span>
-            ) : (
-              items && (
-                <span className="inline-flex items-center gap-1.5 text-sm" style={{ color: ONEDRIVE_BLUE }}>
-                  <CheckCircle2 size={14} aria-hidden="true" />
-                  Synchronisé avec OneDrive
-                </span>
-              )
-            )}
-            {folderError && <p className="text-sm text-danger-text">{folderError}</p>}
-          </div>
+          {folderError && <p className="text-sm text-danger-text mb-2">{folderError}</p>}
 
           <ul className="divide-y divide-anthracite/10">
             {items?.map((item) => (
               <li key={item.id} className="py-2 flex items-center justify-between gap-3 text-sm">
-                <span className="inline-flex items-center gap-2 truncate">
-                  {item.isFolder ? (
+                {item.isFolder ? (
+                  <button
+                    type="button"
+                    onClick={() => openFolder(item)}
+                    className="inline-flex items-center gap-2 truncate hover:text-terracotta-text"
+                  >
                     <Folder size={16} style={{ color: ONEDRIVE_BLUE }} className="shrink-0" aria-hidden="true" />
-                  ) : (
+                    <span className="truncate">{item.name}</span>
+                  </button>
+                ) : (
+                  <span className="inline-flex items-center gap-2 truncate">
                     <FileIcon size={16} className="text-anthracite/50 shrink-0" aria-hidden="true" />
-                  )}
-                  <span className="truncate">{item.name}</span>
-                </span>
+                    <span className="truncate">{item.name}</span>
+                  </span>
+                )}
                 {!project.data?.oneDriveFolderId && item.isFolder && (
                   <Button
                     variant="ghost"
