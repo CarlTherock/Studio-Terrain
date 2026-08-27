@@ -7,8 +7,9 @@
 ## Ce qui est vrai aujourd'hui
 
 - Servi en HTTPS via GitHub Pages.
-- Aucun secret dans le bundle (rien à protéger côté client : pas de clé API, pas de token).
-- Aucune donnée transmise sur le réseau — la synchronisation est entièrement simulée localement, aucun appel réseau réel n'a lieu.
+- Aucun secret d'application dans le bundle — le `clientId`/`tenantId` Microsoft Entra ID visibles dans le code ne sont pas confidentiels : ils identifient un client OAuth **public** (flux SPA/PKCE), le mécanisme officiellement supporté par Microsoft pour ce cas d'usage.
+- La synchronisation métier (clients/projets/observations/tâches/temps) reste entièrement simulée localement — aucun appel réseau réel.
+- **Exception : l'intégration OneDrive/SharePoint (`packages/integrations`) fait de vrais appels réseau** vers `login.microsoftonline.com` et `graph.microsoft.com` une fois l'utilisateur connecté. C'est le seul point de sortie réseau réel de l'application à ce stade.
 - Le code source et le bundle final sont publics (dépôt GitHub public + site GitHub Pages public).
 
 ## Ce qui n'est PAS protégé (limites explicites)
@@ -18,6 +19,13 @@
 - **Aucun isolement multi-tenant** : les types `Organization`/`User`/`Role` existent dans le modèle de données mais aucune règle de permission n'est appliquée.
 - **Aucune protection contre la perte de l'appareil** : effacer les données du navigateur ou perdre l'appareil entraîne la perte définitive des données locales (pas de sauvegarde serveur).
 - **Pas de protection CSRF/XSS/injection côté serveur** : il n'y a pas de serveur, donc ces protections ne s'appliquent pas encore — elles seront nécessaires dès qu'un `HttpApiAdapter` réel sera introduit (voir [ARCHITECTURE.md](./ARCHITECTURE.md)).
+
+## Intégration Microsoft 365 (MSAL.js / PKCE) — ce que ça change
+
+- Le jeton d'accès Microsoft Graph est conservé en `sessionStorage` (choix MSAL, effacé à la fermeture de l'onglet) — c'est le comportement standard et accepté pour une SPA sans backend, mais ça reste un jeton en clair accessible à tout script s'exécutant sur la page (risque XSS classique des SPA).
+- Les portées demandées (`Sites.Read.All`, `Files.ReadWrite.All`) sont un sous-ensemble de celles déjà consenties pour l'app Azure existante — StudioTerrain ne peut pas obtenir plus d'accès que ce que l'administrateur a déjà autorisé pour cette application.
+- Aucun fichier n'est déplacé ni dupliqué — uniquement listé/lu à son emplacement d'origine (respect des permissions SharePoint existantes, spec §9).
+- L'inscription d'application Azure étant partagée avec `emilie-pepin-designer-interieur`, une fuite de configuration dans l'un des deux dépôts n'expose pas de secret exploitable (client public), mais élargit la surface d'URL de redirection à surveiller.
 
 ## Conséquence pratique
 

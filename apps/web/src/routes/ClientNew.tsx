@@ -39,6 +39,35 @@ export function ClientNew() {
           </Button>
         </form>
       </Card>
+
+      <Card className="mt-4">
+        <h2 className="text-sm font-semibold mb-2">Formulaires clients</h2>
+        <ul className="space-y-1 text-sm">
+          <li>
+            <a
+              href="https://tally.so/r/A7Q4a0"
+              target="_blank"
+              rel="noreferrer"
+              className="text-terracotta-text underline underline-offset-2"
+            >
+              Questionnaire de design (nouveau client)
+            </a>
+          </li>
+          <li>
+            <a
+              href="https://tally.so/r/QK9EVG"
+              target="_blank"
+              rel="noreferrer"
+              className="text-terracotta-text underline underline-offset-2"
+            >
+              Migration client existant
+            </a>
+          </li>
+        </ul>
+        <p className="text-xs text-anthracite/50 mt-2">
+          Les réponses ne sont pas encore importées automatiquement — nécessite un backend (webhook Tally).
+        </p>
+      </Card>
     </div>
   );
 }

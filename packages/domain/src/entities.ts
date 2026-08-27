@@ -43,6 +43,10 @@ export interface Project extends BaseEntity {
   clientId: string;
   name: string;
   status: ProjectStatus;
+  /** Stable OneDrive/SharePoint driveItem id — never matched by folder name alone (spec §9). */
+  oneDriveFolderId?: string;
+  oneDriveFolderName?: string;
+  oneDriveWebUrl?: string;
 }
 
 export interface Phase extends BaseEntity {

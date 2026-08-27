@@ -29,7 +29,7 @@ const SIDEBAR_ENTRIES: NavEntry[] = [
   { key: 'projets', label: 'Projets', icon: FolderKanban, to: '/projects' },
   { key: 'taches', label: 'Tâches', icon: ListChecks, to: '/tasks' },
   { key: 'reunions', label: 'Réunions', icon: Video, disabledHint: 'Bientôt disponible' },
-  { key: 'documents', label: 'Documents', icon: Files, disabledHint: 'Bientôt disponible' },
+  { key: 'documents', label: 'Documents', icon: Files, to: '/documents' },
   { key: 'temps', label: 'Temps', icon: Timer, to: '/time' },
   { key: 'rapports', label: 'Rapports', icon: FileBarChart, disabledHint: 'Bientôt disponible' },
 ];

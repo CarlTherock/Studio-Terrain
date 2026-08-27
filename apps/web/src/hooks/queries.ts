@@ -46,6 +46,23 @@ export function useProject(projectId: string | undefined) {
   });
 }
 
+export function useLinkProjectOneDriveFolder() {
+  const { api } = useApiClient();
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (input: { projectId: string; folderId: string; folderName: string; webUrl: string }) =>
+      api.projects.update(input.projectId, {
+        oneDriveFolderId: input.folderId,
+        oneDriveFolderName: input.folderName,
+        oneDriveWebUrl: input.webUrl,
+      }),
+    onSuccess: (project) => {
+      qc.invalidateQueries({ queryKey: ['projects'] });
+      qc.invalidateQueries({ queryKey: ['projects', project.id] });
+    },
+  });
+}
+
 export function useCreateProject() {
   const { api } = useApiClient();
   const qc = useQueryClient();

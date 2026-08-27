@@ -1,3 +1,4 @@
+import { lazy, Suspense } from 'react';
 import { Route, Routes } from 'react-router-dom';
 import { AppShell } from './layout/AppShell';
 import { Dashboard } from './routes/Dashboard';
@@ -14,9 +15,13 @@ import { Search } from './routes/Search';
 import { SyncStatusDetail } from './routes/SyncStatusDetail';
 import { TimeTracking } from './routes/TimeTracking';
 
+// Lazy-loaded: pulls in @azure/msal-browser, kept out of the initial bundle.
+const Documents = lazy(() => import('./routes/Documents').then((m) => ({ default: m.Documents })));
+
 export function App() {
   return (
     <AppShell>
+      <Suspense fallback={<p className="text-sm text-anthracite/60">Chargement…</p>}>
       <Routes>
         <Route path="/" element={<Dashboard />} />
         <Route path="/clients" element={<ClientsList />} />
@@ -31,7 +36,9 @@ export function App() {
         <Route path="/search" element={<Search />} />
         <Route path="/sync" element={<SyncStatusDetail />} />
         <Route path="/time" element={<TimeTracking />} />
+        <Route path="/documents" element={<Documents />} />
       </Routes>
+      </Suspense>
     </AppShell>
   );
 }

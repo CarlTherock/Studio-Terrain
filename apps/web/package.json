@@ -14,6 +14,7 @@
   },
   "dependencies": {
     "@studio-terrain/domain": "workspace:*",
+    "@studio-terrain/integrations": "workspace:*",
     "@studio-terrain/sync": "workspace:*",
     "@studio-terrain/ui": "workspace:*",
     "react": "^18.3.1",

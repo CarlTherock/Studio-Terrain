@@ -16,7 +16,7 @@
 | `Role` | orgId, name, permissions[] | Organization (non appliqué dans cette phase) |
 | `Client` | orgId, name, contactIds[] | Organization, Contact[] |
 | `Contact` | clientId, name, email?, phone? | Client |
-| `Project` | orgId, clientId, name, status | Organization, Client |
+| `Project` | orgId, clientId, name, status, oneDriveFolderId?, oneDriveFolderName?, oneDriveWebUrl? | Organization, Client |
 | `Phase` | projectId, name, order | Project |
 | `Zone` | projectId, phaseId?, name | Project, Phase |
 | `Plan` | projectId, zoneId?, name | Project, Zone |
@@ -24,6 +24,7 @@
 | `Observation` | projectId, zoneId?, planVersionId?, note, photoIds[], authorId, markerX?, markerY? | Project, Zone, PlanVersion, Photo[] |
 | `Photo` | observationId, blob, annotations? | Observation |
 | `Task` | projectId, observationId?, title, assigneeId?, status, dueDate? | Project, Observation, User |
+| `TimeEntry` | projectId, category, billable, startedAt, endedAt? | Project |
 | `SyncOperation` | entityType, entityId, opType, payload, status, localSeq | — (méta-entité de synchronisation) |
 
 ## Note sur Organization / User / Role
@@ -42,11 +43,16 @@ class StudioTerrainDB extends Dexie {
   observations: Table<Observation, string>;
   photos: Table<Photo, string>;   // Blob stocké nativement (clonage structuré Dexie)
   tasks: Table<Task, string>;
+  timeEntries: Table<TimeEntry, string>;
   syncQueue: Table<SyncOperation, string>;
 }
 ```
 
 Index principaux : `id`, `orgId`/`clientId`/`projectId` (clés étrangères filtrables), `deletedAt` (exclusion des éléments supprimés), `status`/`localSeq` sur `syncQueue`.
+
+## Association OneDrive/SharePoint
+
+`Project.oneDriveFolderId` référence un `driveItem` Microsoft Graph par son identifiant stable — jamais par nom de dossier seul (spec §9). `oneDriveFolderName`/`oneDriveWebUrl` ne sont que des valeurs d'affichage dérivées, recalculables depuis l'id.
 
 ## Photos
 

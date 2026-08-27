@@ -29,6 +29,9 @@ importers:
       '@studio-terrain/domain':
         specifier: workspace:*
         version: link:../../packages/domain
+      '@studio-terrain/integrations':
+        specifier: workspace:*
+        version: link:../../packages/integrations
       '@studio-terrain/sync':
         specifier: workspace:*
         version: link:../../packages/sync
@@ -121,6 +124,16 @@ importers:
         specifier: ^2.1.4
         version: 2.1.9(@types/node@22.20.1)(jsdom@25.0.1(supports-color@7.2.0))(supports-color@7.2.0)(terser@5.51.0)
 
+  packages/integrations:
+    dependencies:
+      '@azure/msal-browser':
+        specifier: ^3.28.0
+        version: 3.30.0
+    devDependencies:
+      typescript:
+        specifier: ^5.6.3
+        version: 5.9.3
+
   packages/sync:
     dependencies:
       '@studio-terrain/domain':
@@ -179,6 +192,14 @@ packages:
 
   '@asamuzakjp/css-color@3.2.0':
     resolution: {integrity: sha512-K1A6z8tS3XsmCMM86xoWdn7Fkdn9m6RSVtocUrJYIwZnFVkng/PvkEoWtOWmP+Scc6saYWHWZYbndEEXxl24jw==}
+
+  '@azure/msal-browser@3.30.0':
+    resolution: {integrity: sha512-I0XlIGVdM4E9kYP5eTjgW8fgATdzwxJvQ6bm2PNiHaZhEuUz47NYw1xHthC9R+lXz4i9zbShS0VdLyxd7n0GGA==}
+    engines: {node: '>=0.8.0'}
+
+  '@azure/msal-common@14.16.1':
+    resolution: {integrity: sha512-nyxsA6NA4SVKh5YyRpbSXiMr7oQbwark7JU9LMeg6tJYTSPyAGkdx61wPT4gyxZfxlSxMMEyAsWaubBlNyIa1w==}
+    engines: {node: '>=0.8.0'}
 
   '@babel/code-frame@7.29.7':
     resolution: {integrity: sha512-Aup7aUOfpbAUg2ROOJN6Iw5f9DMBlzu0mIkm/malLQFN/YQgO48wCj0Kxa3sEHJvPVFg7siR+qRInwXd2qhQKw==}
@@ -3122,6 +3143,12 @@ snapshots:
       '@csstools/css-parser-algorithms': 3.0.5(@csstools/css-tokenizer@3.0.4)
       '@csstools/css-tokenizer': 3.0.4
       lru-cache: 10.4.3
+
+  '@azure/msal-browser@3.30.0':
+    dependencies:
+      '@azure/msal-common': 14.16.1
+
+  '@azure/msal-common@14.16.1': {}
 
   '@babel/code-frame@7.29.7':
     dependencies:
