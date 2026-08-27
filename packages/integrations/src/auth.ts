@@ -21,7 +21,9 @@ export function getActiveAccount(): AccountInfo | undefined {
 
 export async function signIn(redirectUri: string): Promise<AccountInfo> {
   const msal = await getMsal(redirectUri);
-  const result = await msal.loginPopup({ scopes: [...GRAPH_SCOPES] });
+  // Always show Microsoft's account chooser — never silently reuse an
+  // existing SSO session, so the user can pick or type a different account.
+  const result = await msal.loginPopup({ scopes: [...GRAPH_SCOPES], prompt: 'select_account' });
   msal.setActiveAccount(result.account);
   return result.account;
 }

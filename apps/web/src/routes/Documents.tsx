@@ -5,6 +5,7 @@ import { listChildrenById, listFolder, type DriveItem } from '@studio-terrain/in
 import { Button, Card } from '@studio-terrain/ui';
 import { useLinkProjectOneDriveFolder, useProject, useProjects } from '../hooks/queries';
 import { useMicrosoftAuth } from '../hooks/useMicrosoftAuth';
+import { MicrosoftSignInButton } from '../components/MicrosoftSignInButton';
 
 /** Microsoft's official OneDrive blue — used only for OneDrive-branded elements. */
 const ONEDRIVE_BLUE = '#0078D4';
@@ -90,16 +91,14 @@ export function Documents() {
 
       {!auth.account ? (
         <Card>
-          <button
-            type="button"
+          <MicrosoftSignInButton
             onClick={() => auth.connect()}
             disabled={auth.connecting}
-            className="inline-flex items-center gap-2 rounded-control px-4 min-h-[44px] font-medium text-white transition-colors duration-base disabled:opacity-50"
-            style={{ backgroundColor: ONEDRIVE_BLUE }}
-          >
-            <Cloud size={18} aria-hidden="true" />
-            {auth.connecting ? 'Connexion à OneDrive…' : 'Se connecter à OneDrive'}
-          </button>
+            label={auth.connecting ? 'Connexion…' : 'Se connecter avec Microsoft'}
+          />
+          <p className="text-xs text-anthracite/50 mt-2">
+            Une fenêtre Microsoft s'ouvre pour choisir ou saisir le compte à utiliser.
+          </p>
           {auth.error && <p className="text-sm text-danger-text mt-2">{auth.error}</p>}
         </Card>
       ) : (
